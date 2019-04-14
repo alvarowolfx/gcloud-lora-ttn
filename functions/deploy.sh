@@ -1,0 +1,1 @@
+gcloud functions deploy HandleTTNUplink --runtime go111 --trigger-http

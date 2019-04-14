@@ -2,7 +2,7 @@
 
 Process uplink messages from TTN on Google Cloud, storing Realtime data on Firebase, historical data on BigQuery and visualize the data though a web app.
 
-**THIS IS A WORK IN PROGRESS**
+️ ⚠️️️️**THIS IS A WORK IN PROGRESS** ⚠️
 
 LoRa End Node:
 ![Lora Node](./images/lora-node.jpg)
@@ -10,8 +10,11 @@ LoRa End Node:
 Data arriving on The Things Network:
 ![The Things Network Dash](./images/ttn.png)
 
-Data on Firebase:
+Realtime Data on Firebase:
 ![Data Firebase](./images/fb-data.png)
+
+Query Data on Bigquery:
+![Data on Bigquery](./images/query-data.png)
 
 ## BOM - Bill of Materials
 
@@ -77,3 +80,4 @@ After deploying the cloud function, you can get it's url that will look like `ht
 ## References
 * https://learn.adafruit.com/using-lorawan-and-the-things-network-with-circuitpython?view=all
 * https://www.thethingsnetwork.org/docs/applications/http/#uplink
+* https://cloud.google.com/bigquery/streaming-data-into-bigquery#bigquery_table_insert_rows-go

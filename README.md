@@ -4,6 +4,10 @@ Process uplink messages from TTN on Google Cloud, storing Realtime data on Fireb
 
 **THIS IS A WORK IN PROGRESS**
 
+![Lora Node](./images/lora-node.jpg)
+
+![The Things Network Dash](./images/ttn.png)
+
 ## BOM - Bill of Materials
 
 ### Gateway 

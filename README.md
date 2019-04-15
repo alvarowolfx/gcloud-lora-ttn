@@ -4,6 +4,8 @@ Process uplink messages from TTN on Google Cloud, storing Realtime data on Fireb
 
 ️ ⚠️️️️**THIS IS A WORK IN PROGRESS** ⚠️
 
+![Architecture](./images/flow.png)
+
 LoRa End Node:
 ![Lora Node](./images/lora-node.jpg)
 

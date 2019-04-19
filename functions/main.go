@@ -1,8 +1,10 @@
 package ttn
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -45,8 +47,19 @@ func init() {
 
 // HandleTTNUplink process uplink msg sent by TTN
 func HandleTTNUplink(w http.ResponseWriter, r *http.Request) {
+	bodyBytes, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Printf("error reading body: %v\n", err.Error())
+		sendErrorResponse(w, err.Error())
+		return
+	}
+	log.Printf("received body %v\n", string(bodyBytes))
+
+	// Restore the io.ReadCloser to its original state
+	r.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+
 	var msg UplinkMessage
-	err := json.NewDecoder(r.Body).Decode(&msg)
+	err = json.NewDecoder(r.Body).Decode(&msg)
 
 	if err != nil {
 		log.Printf("error decoding body: %v\n", err.Error())

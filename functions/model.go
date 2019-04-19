@@ -30,16 +30,16 @@ type UplinkMessage struct {
 		BitRate    int       `json:"bit_rate"`
 		CodingRate string    `json:"coding_rate"`
 		Gateways   []struct {
-			GtwID     string    `json:"gtw_id"`
-			Timestamp int       `json:"timestamp"`
-			Time      time.Time `json:"time"`
-			Channel   int       `json:"channel"`
-			Rssi      int       `json:"rssi"`
-			Snr       float64   `json:"snr"`
-			RfChain   int       `json:"rf_chain"`
-			Latitude  float64   `json:"latitude"`
-			Longitude float64   `json:"longitude"`
-			Altitude  float64   `json:"altitude"`
+			GtwID     string  `json:"gtw_id"`
+			Timestamp int     `json:"timestamp"`
+			Time      string  `json:"time,omitempty"`
+			Channel   int     `json:"channel"`
+			Rssi      int     `json:"rssi"`
+			Snr       float64 `json:"snr"`
+			RfChain   int     `json:"rf_chain"`
+			Latitude  float64 `json:"latitude"`
+			Longitude float64 `json:"longitude"`
+			Altitude  float64 `json:"altitude"`
 		} `json:"gateways"`
 		Latitude  float64 `json:"latitude"`
 		Longitude float64 `json:"longitude"`

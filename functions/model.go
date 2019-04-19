@@ -59,7 +59,7 @@ func parseDeviceData(payload string) map[string]interface{} {
 	}
 
 	decoder := cayennelpp.NewDecoder(bytes.NewBuffer(rawPayload))
-	target := &UplinkTarget{}
+	target := NewUplinkTarget()
 
 	err = decoder.DecodeUplink(target)
 

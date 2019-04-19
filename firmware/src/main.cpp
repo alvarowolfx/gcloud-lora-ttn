@@ -5,17 +5,17 @@
 
 #define AU915 1
 
+#include <CayenneLPP.h>
 #include <TinyLoRa.h>
 #include <SPI.h>
 #include "secrets.h"
 
-#define NODE_ID 1
 #define CCS811_ADDR 0x5B
 #define VBATPIN A7
 #define SLEEP_INTERVAL 10 * 60 * 1000
 
-// Data Packet to Send to TTN
-unsigned char loraData[9];
+// LPP Data Packet to Send to TTN
+CayenneLPP lpp(51);
 
 Adafruit_CCS811 ccs;
 TinyLoRa lora = TinyLoRa(3, 8);
@@ -92,28 +92,14 @@ void loop()
 
   float batValue = ((analogRead(VBATPIN) * 2) * 3.3) / 1024;
 
-  // encode float as int
-  int16_t tempInt = round(temp * 100);
-  int16_t batInt = round(batValue * 100);
-
   // encode int as bytes
-  //byte payload[2];
-  loraData[0] = NODE_ID;
-
-  loraData[1] = highByte(tempInt);
-  loraData[2] = lowByte(tempInt);
-
-  loraData[3] = highByte(co2);
-  loraData[4] = lowByte(co2);
-
-  loraData[5] = highByte(tvoc);
-  loraData[6] = lowByte(tvoc);
-
-  loraData[7] = highByte(batInt);
-  loraData[8] = lowByte(batInt);
+  lpp.addTemperature(0, temp);
+  lpp.addAnalogInput(1, batValue);
+  lpp.addAnalogInput(2, co2 / 100.0);
+  lpp.addAnalogInput(3, tvoc / 100.0);
 
   Serial.println("Sending LoRa Data...");
-  lora.sendData(loraData, sizeof(loraData), lora.frameCounter);
+  lora.sendData(lpp.getBuffer(), lpp.getSize(), lora.frameCounter);
   Serial.print("Frame Counter: ");
   Serial.println(lora.frameCounter);
   lora.frameCounter++;

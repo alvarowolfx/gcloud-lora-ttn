@@ -1,9 +1,11 @@
 package ttn
 
 import (
+	"bytes"
 	"cloud.google.com/go/bigquery"
 	"encoding/base64"
 	"encoding/json"
+	"github.com/TheThingsNetwork/go-cayenne-lib/cayennelpp"
 	"time"
 )
 
@@ -56,26 +58,19 @@ func parseDeviceData(payload string) map[string]interface{} {
 		}
 	}
 
-	tempInt := (int(rawPayload[1]) << 8) | int(rawPayload[2])
-	co2Int := (int(rawPayload[3]) << 8) | int(rawPayload[4])
-	tvocInt := (int(rawPayload[5]) << 8) | int(rawPayload[6])
-	batInt := (int(rawPayload[7]) << 8) | int(rawPayload[8])
+	decoder := cayennelpp.NewDecoder(bytes.NewBuffer(rawPayload))
+	target := &UplinkTarget{}
 
-	// Decode Feather ID
-	featherID := rawPayload[0]
-	// Decode int to float
-	temp := float64(tempInt) / 100.0
-	co2 := float64(co2Int) / 100.0
-	tvoc := float64(tvocInt) / 100.0
-	bat := float64(batInt) / 100.0
+	err = decoder.DecodeUplink(target)
 
-	return map[string]interface{}{
-		"feather_id":  featherID,
-		"temperature": temp,
-		"co2":         co2,
-		"tvoc":        tvoc,
-		"battery":     bat,
+	if err != nil {
+		return map[string]interface{}{
+			"raw":   payload,
+			"error": err.Error(),
+		}
 	}
+
+	return target.GetValues()
 }
 
 // DeviceData represents a row item.

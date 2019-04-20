@@ -101,6 +101,7 @@ func GetDeviceUpdate(msg UplinkMessage) map[string]interface{} {
 		gateways[gateway.GtwID] = map[string]interface{}{
 			"id":        gateway.GtwID,
 			"rssi":      gateway.Rssi,
+			"snr":       gateway.Snr,
 			"channel":   gateway.Channel,
 			"time":      gateway.Timestamp,
 			"latitude":  gateway.Latitude,

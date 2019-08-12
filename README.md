@@ -2,6 +2,8 @@
 
 Process uplink messages from TTN on Google Cloud, storing Realtime data on Firebase, historical data on BigQuery and visualize the data though a web app.
 
+Web App URL : [Access Here](https://ttn-gcp-lora.firebaseapp.com/)
+
 ️ ⚠️️️️**THIS IS A WORK IN PROGRESS** ⚠️
 
 ![Architecture](./images/flow.png)
@@ -17,6 +19,9 @@ Realtime Data on Firebase:
 
 Query Data on Bigquery:
 ![Data on Bigquery](./images/query-data.png)
+
+Monitor data on a WebApp :
+![Web App](./images/ttn-web-app.png)
 
 ## BOM - Bill of Materials
 
@@ -66,7 +71,7 @@ cd functions
 ./deploy.sh
 ```
 
-After deploying the cloud function, you can get it's url that will look like `https://{project-region}-{project-id}.cloudfunctions.net/HandleTTNUplink`.
+After deploying the cloud function, you can get it's url that will look like `https://{project-region}-{project-id}.cloudfunctions.net/HandleTTNUplink` that handles TTN data and another one that will look like `https://{project-region}-{project-id}.cloudfunctions.net/HandleDeviceHistoryQuery` that returns device history to be used by the UI.
 
 ## The Things Network Setup
 
@@ -76,6 +81,13 @@ After deploying the cloud function, you can get it's url that will look like `ht
 
 ![TTN Integration 1](./images/ttn-integration1.png)
 ![TTN Integration 2](./images/ttn-integration2.png)
+
+## Deploy Web UI on Firebase
+
+* Enable Firebase Hosting on the web project
+  * `cd web && firebase init` and choose your Firebase project
+* Deploy UI
+  * `npm run deploy`
 
 **Work in Progress**
 

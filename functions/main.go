@@ -8,10 +8,12 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"cloud.google.com/go/bigquery"
 	"firebase.google.com/go"
 	"firebase.google.com/go/db"
+	"google.golang.org/api/iterator"
 )
 
 var app *firebase.App
@@ -43,6 +45,66 @@ func init() {
 	if err != nil {
 		log.Fatalf("error initializing bigquery client: %v\n", err)
 	}
+}
+
+// HistoryResultItem history query result
+type HistoryResultItem struct {
+	DeviceID string    `json:"deviceId"`
+	Time     time.Time `json:"time"`
+	Data     string    `json:"data"`
+}
+
+// HandleDeviceHistoryQuery returns last 7 days of data for a device
+func HandleDeviceHistoryQuery(w http.ResponseWriter, r *http.Request) {
+	finished := handleCORSRequest(w, r)
+	if finished {
+		return
+	}
+
+	p := r.URL.Query()
+	deviceID := p.Get("deviceId")
+	if deviceID == "" {
+		sendErrorResponse(w, "Missing deviceId query param.")
+		return
+	}
+
+	table := "`" + projectID + "." + datasetID + "." + tableID + "`"
+	q := bqClient.Query(`
+		SELECT d.deviceId,
+			d.time,
+			JSON_EXTRACT(d.data, '$.data') as data
+		FROM ` + table + ` d
+		WHERE d.time between timestamp_sub(current_timestamp, INTERVAL 7 DAY) and current_timestamp()    
+		and d.deviceId = "` + deviceID + `"
+    order by d.time
+	`)
+	ctx := context.Background()
+	it, err := q.Read(ctx)
+
+	if err != nil {
+		sendErrorResponse(w, err.Error())
+		return
+	}
+
+	var results []interface{}
+
+	for {
+		var i HistoryResultItem
+		err := it.Next(&i)
+		if err == iterator.Done {
+			break
+		}
+
+		if err != nil {
+			sendErrorResponse(w, err.Error())
+			return
+		}
+
+		results = append(results, i)
+	}
+
+	sendSuccessResponseWithData(w, results)
+	return
 }
 
 // HandleTTNUplink process uplink msg sent by TTN

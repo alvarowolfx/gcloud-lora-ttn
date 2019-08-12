@@ -4,3 +4,6 @@
 .vscode/
 .ipynb_checkpoints
 ttn-lora-gcp
+node_modules
+.cache
+dist

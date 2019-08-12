@@ -1,10 +1,6 @@
-
 #include <Arduino.h>
-#include <SparkFunCCS811.h>
 #include <ArduinoLowPower.h>
-
-#define AU915 1
-
+#include <SparkFunCCS811.h>
 #include <CayenneLPP.h>
 #include <TinyLoRa.h>
 #include <SPI.h>
@@ -13,6 +9,18 @@
 #define CCS811_ADDR 0x5B
 #define VBATPIN A7
 #define SLEEP_INTERVAL 10 * 60 * 1000
+
+// #define DEBUG Serial
+#define DEBUG_ENABLED true
+#if DEBUG_ENABLED
+#define Println(x) Serial.println(x)
+#define Print(x) Serial.print(x)
+#define PrintNum(x, y) Serial.print(x, y)
+#else
+#define Println(x)
+#define Print(x)
+#define PrintNum(x, y)
+#endif
 
 // LPP Data Packet to Send to TTN
 CayenneLPP lpp(51);
@@ -25,8 +33,13 @@ void printDriverError(CCS811Core::status errorCode);
 
 void setup()
 {
-  Serial.begin(9600);
-  Serial.println("TTN Air Quality Sensor");
+  delay(2000);
+  if (DEBUG_ENABLED)
+  {
+    Serial.begin(9600);
+    delay(2000);
+  }
+  Println("TTN Air Quality Sensor");
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
 
@@ -37,41 +50,44 @@ void setup()
 
   if (!lora.begin())
   {
-    Serial.println("Failed");
-    Serial.println("Check your radio");
-    while (true)
-    {
-      Serial.println("LoRa Failed");
-      delay(500);
-    }
+    Println("Failed");
+    Println("Check your radio");
+    Println("LoRa Failed");
+    delay(500);
+    NVIC_SystemReset();
   }
-  Serial.println("OK");
+  Println("OK");
 
   CCS811Core::status returnCode = ccs.begin();
-  Serial.print("CCS811 begin exited with: ");
+  Print("CCS811 begin exited with: ");
   printDriverError(returnCode);
-  Serial.println();
+  Println();
 
   ccs.setRefResistance(9950);
 
   if (returnCode != CCS811Core::SENSOR_SUCCESS)
   {
-    Serial.println("Failed to start sensor! Please check your wiring.");
+    Println("Failed to start sensor! Please check your wiring.");
+    NVIC_SystemReset();
     return;
   }
 
   //calibrate temperature sensor
+  boolean calibrationState = false;
   while (!ccs.dataAvailable())
   {
-    Serial.print(".");
+    Print(".");
     delay(100);
+    digitalWrite(LED_BUILTIN, calibrationState);
+    calibrationState = !calibrationState;
   };
+  digitalWrite(LED_BUILTIN, true);
   ccs.readNTC();
 
-  Serial.print(" Converted temperature : ");
+  Print(" Converted temperature : ");
   float readTemperature = ccs.getTemperature();
-  Serial.print(readTemperature, 2);
-  Serial.println(" deg C");
+  PrintNum(readTemperature, 2);
+  Println(" deg C");
 
   ccs.setEnvironmentalData(50, readTemperature);
   delay(30 * 1000);
@@ -83,10 +99,10 @@ void loop()
 
   ccs.readNTC();
 
-  Serial.print(" Converted temperature : ");
+  Print(" Converted temperature : ");
   float temp = ccs.getTemperature();
-  Serial.print(temp, 2);
-  Serial.println(" deg C");
+  PrintNum(temp, 2);
+  Println(" deg C");
 
   ccs.setEnvironmentalData(50, temp);
 
@@ -98,16 +114,16 @@ void loop()
   {
     co2 = ccs.getCO2();
     tvoc = ccs.getTVOC();
-    Serial.print("CO2: ");
-    Serial.print(co2);
-    Serial.print("ppm, TVOC: ");
-    Serial.print(tvoc);
-    Serial.print("ppb  Temp:");
-    Serial.println(temp);
+    Print("CO2: ");
+    Print(co2);
+    Print("ppm, TVOC: ");
+    Print(tvoc);
+    Print("ppb  Temp:");
+    Println(temp);
   }
   else
   {
-    Serial.println("ERROR!");
+    Println("ERROR!");
     printSensorError();
   }
 
@@ -120,26 +136,27 @@ void loop()
   lpp.addLuminosity(2, co2);
   lpp.addLuminosity(3, tvoc);
 
-  Serial.println("Sending LoRa Data...");
+  Println("Sending LoRa Data...");
   lora.sendData(lpp.getBuffer(), lpp.getSize(), lora.frameCounter);
-  Serial.print("Frame Counter: ");
-  Serial.println(lora.frameCounter);
+  Print("Frame Counter: ");
+  Println(lora.frameCounter);
   lora.frameCounter++;
 
-  delay(1000);
+  delay(2000);
 
   digitalWrite(LED_BUILTIN, LOW);
 
   LowPower.sleep(SLEEP_INTERVAL);
 
 #ifdef USBCON
-  USBDevice.attach();
+  // USBDevice.attach();
 #endif
+  // delay(SLEEP_INTERVAL);
 
-  Serial.print("I'm awake now! I slept for ");
-  Serial.print(SLEEP_INTERVAL / 1000, DEC);
-  Serial.println(" seconds.");
-  Serial.println();
+  Print("I'm awake now! I slept for ");
+  PrintNum(SLEEP_INTERVAL / 1000, DEC);
+  Println(" seconds.");
+  Println();
 
   //delay(30 * 1000);
 }
@@ -149,22 +166,22 @@ void printDriverError(CCS811Core::status errorCode)
   switch (errorCode)
   {
   case CCS811Core::SENSOR_SUCCESS:
-    Serial.print("SUCCESS");
+    Print("SUCCESS");
     break;
   case CCS811Core::SENSOR_ID_ERROR:
-    Serial.print("ID_ERROR");
+    Print("ID_ERROR");
     break;
   case CCS811Core::SENSOR_I2C_ERROR:
-    Serial.print("I2C_ERROR");
+    Print("I2C_ERROR");
     break;
   case CCS811Core::SENSOR_INTERNAL_ERROR:
-    Serial.print("INTERNAL_ERROR");
+    Print("INTERNAL_ERROR");
     break;
   case CCS811Core::SENSOR_GENERIC_ERROR:
-    Serial.print("GENERIC_ERROR");
+    Print("GENERIC_ERROR");
     break;
   default:
-    Serial.print("Unspecified error.");
+    Print("Unspecified error.");
   }
 }
 
@@ -176,23 +193,23 @@ void printSensorError()
 
   if (error == 0xFF) //comm error
   {
-    Serial.println("Failed to get ERROR_ID register.");
+    Println("Failed to get ERROR_ID register.");
   }
   else
   {
-    Serial.print("Error: ");
+    Print("Error: ");
     if (error & 1 << 5)
-      Serial.print("HeaterSupply");
+      Print("HeaterSupply");
     if (error & 1 << 4)
-      Serial.print("HeaterFault");
+      Print("HeaterFault");
     if (error & 1 << 3)
-      Serial.print("MaxResistance");
+      Print("MaxResistance");
     if (error & 1 << 2)
-      Serial.print("MeasModeInvalid");
+      Print("MeasModeInvalid");
     if (error & 1 << 1)
-      Serial.print("ReadRegInvalid");
+      Print("ReadRegInvalid");
     if (error & 1 << 0)
-      Serial.print("MsgInvalid");
-    Serial.println();
+      Print("MsgInvalid");
+    Println();
   }
 }

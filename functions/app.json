@@ -1,0 +1,9 @@
+{
+  "name": "ttn-gcp-lora",
+  "env": {
+    "GCP_PROJECT": {
+      "description": "Your Google Cloud Project ID",
+      "required": true
+    }
+  }
+}

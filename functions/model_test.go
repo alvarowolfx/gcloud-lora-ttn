@@ -17,5 +17,4 @@ func TestDecodeTTNJson(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error: decoding uplink %v", err)
 	}
-
 }

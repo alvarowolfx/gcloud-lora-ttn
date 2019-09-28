@@ -7,6 +7,19 @@
       "**/node_modules/**"
     ],
     "rewrites": [
+      /* Config for cloud run */
+      {
+        "source": "/history",
+        "run": {
+          "serviceId": "ttn-gcp-lora"
+        }
+      },
+      /* Config for Çloud Functions
+      {
+        "source": "/history",
+        "function": "HandleDeviceHistoryQuery"
+      },
+      */
       {
         "source": "**",
         "destination": "/index.html"

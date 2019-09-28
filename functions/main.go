@@ -19,7 +19,7 @@ import (
 var app *firebase.App
 var database *db.Client
 var bqClient *bigquery.Client
-var projectID = os.Getenv("GCLOUD_PROJECT")
+var projectID = os.Getenv("GCP_PROJECT")
 var datasetID = "ttn_dataset"
 var tableID = "raw_data"
 

@@ -7,3 +7,4 @@ ttn-lora-gcp
 node_modules
 .cache
 dist
+web/pkg

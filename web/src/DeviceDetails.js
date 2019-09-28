@@ -22,8 +22,6 @@ import {
 
 import config from './config'
 
-const historyUrl = config.baseUrl + "/HandleDeviceHistoryQuery"
-
 const styles = {
   root: {
     flexGrow: 1,
@@ -166,7 +164,7 @@ function DeviceDetails({ classes, match }) {
       setLoading(false)
     }
 
-    const url = historyUrl + '?deviceId=' + deviceId
+    const url = '/history?deviceId=' + deviceId
     const fetchHistoryData = () => {
       fetch(url)
         .then(res => res.json())
